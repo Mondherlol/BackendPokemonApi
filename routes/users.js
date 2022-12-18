@@ -51,9 +51,9 @@ router.post('/signin', async function(req, res, next) {
     
         let exists = await User.exists({nom:req.body.username});
         if (exists) {
-            const user = await User.find({nom: username})
+            const user = await User.find({nom: req.body.username})
            // const hashed_password = ByEncrpyt(password.toString());
-            if (user.mdp===req.body.password) {
+            if (user.mdp==req.body.password) {
                 let token = jwt.sign({
                     data: req.body.username
                 }, 'secret');
@@ -66,7 +66,7 @@ router.post('/signin', async function(req, res, next) {
                 console.log("Wrong Password");
                 res.send({
                     status: 0,
-                    error: error
+                    error: "error"
                 });
             }
         } else {
