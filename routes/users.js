@@ -91,32 +91,53 @@ router.get('/equipe/:id',async function(req,res){
 });
 router.put('/addPokemon/:id',async function(req,res){
     try {
-        pokemon=req.body.pokemon;
-        await User.findByIdAndUpdate(req.params.id, {
-         $push:{
-             pokemons : pokemon
-         }
-    
-        });
-        // Send response in here
-        res.send('pokemon ajouté!');
-  
-      } catch(err) {
+        const users = await User.findOne({'_id': req.params.id});
+        
+        if(users.pokemons.length<6){
+            await User.findByIdAndUpdate(req.params.id, {
+            
+            $push:{
+                pokemons : req.body.pokemon
+            }
+        
+            });
+            // Send response in here
+            res.send('pokemon ajouté!');
+        }
+        else {
+            console.log("More than 6 pokemons!!");
+            res.send({
+                status: 0,
+                error: "Pokemon limit reached!!"
+            });
+        }}
+       catch(err) {
           console.error(err.message);
          
-      }
-  });
+       }}
+  );
 router.put('/removePokemon/:id',async function(req,res){
      try {
+        const users = await User.findOne({'_id': req.params.id});
+        pokes=users.pokemons;
+        var pokemonIndex = pokes.indexOf(req.body.pokemon);
+        if (pokemonIndex=-1){
+        pokes.splice(pokemonIndex, 1);
         await User.findByIdAndUpdate(req.params.id, {
          $set:{
-             pokemons:req.body.pokemons,
+             pokemons:pokes,
          }
     
         });
         // Send response in here
         res.send('pokemon supprimée!');
-  
+        }else{
+            console.log("Pokemon n'existe pas!!");
+            res.send({
+                status: 0,
+                error: "Pokemon Doesn't Exist!!"
+            });
+        }
       } catch(err) {
           console.error(err.message);
          
