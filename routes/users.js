@@ -82,8 +82,8 @@ router.post('/signin', async function(req, res, next) {
 });
 router.get('/equipe/:id',async function(req,res){
     try {
-        const users = await User.find({'_id': req.params.id})
-        res.json(users)
+        const users = await User.findOne({'_id': req.params.id})
+        res.json(users.pokemons)
         console.log("request 200 complete")
       } catch (err) {
         res.status(500).json({ message: err.message })
