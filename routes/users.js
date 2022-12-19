@@ -90,29 +90,33 @@ router.get('/equipe/:id',async function(req,res){
       }
 });
 router.put('/addPokemon/:id',async function(req,res){
+    console.log(req.body);
+    let exiteDeja=false;
     try {
         const users = await User.findOne({'_id': req.params.id});
         
         if(users.pokemons.length<6){
             if(users.pokemons.filter(p=>p.idPokemon == req.body.idPokemon).length > 0){
                 console.log("Already in the team.");
+                existeDeja=true;
                 res.send({
                     status: 0,
                     error: "Already in the team!!"
                 });
-            }
-            await User.findByIdAndUpdate(req.params.id, {
-            
-            $push:{
-                pokemons : req.body.pokemon
+            }else {
+                await User.findByIdAndUpdate(req.params.id, {
+                    $push:{
+                        pokemons : req.body
+                    }
+                
+                    });
+                    // Send response in here
+                    res.send({
+                        status:1,
+                        message:'pokemon ajouté!'}
+                        );
             }
         
-            });
-            // Send response in here
-            res.send({
-                status:1,
-                message:'pokemon ajouté!'}
-                );
         }
         else {
             console.log("More than 6 pokemons!!");
@@ -126,32 +130,55 @@ router.put('/addPokemon/:id',async function(req,res){
          
        }}
   );
-router.put('/removePokemon/:id',async function(req,res){
-     try {
-        const users = await User.findOne({'_id': req.params.id});
-        pokes=users.pokemons;
-        var pokemonIndex = pokes.indexOf(req.body.pokemon);
-        if (pokemonIndex=-1){
-        pokes.splice(pokemonIndex, 1);
-        await User.findByIdAndUpdate(req.params.id, {
-         $set:{
-             pokemons:pokes,
-         }
+// router.put('/removePokemon/:id',async function(req,res){
+//      try {
+//         const users = await User.findOne({'_id': req.params.id});
+//         pokes=users.pokemons;
+//         var pokemonIndex = pokes.indexOf(req.body.pokemon);
+//         if (pokemonIndex=-1){
+//         pokes.splice(pokemonIndex, 1);
+//         await User.findByIdAndUpdate(req.params.id, {
+//          $set:{
+//              pokemons:pokes,
+//          }
     
-        });
-        // Send response in here
-        res.send('pokemon supprimée!');
-        }else{
-            console.log("Pokemon n'existe pas!!");
-            res.send({
-                status: 0,
-                error: "Pokemon Doesn't Exist!!"
-            });
-        }
-      } catch(err) {
-          console.error(err.message);
+//         });
+//         // Send response in here
+//         res.send('pokemon supprimée!');
+//         }else{
+//             console.log("Pokemon n'existe pas!!");
+//             res.send({
+//                 status: 0,
+//                 error: "Pokemon Doesn't Exist!!"
+//             });
+//         }
+//       } catch(err) {
+//           console.error(err.message);
          
-      }
+//       }
+//   });
+  router.delete('/pokemon/:idPokemon/:idUser',(req,res,next)=>{
+    idPokemon=req.params.idPokemon;
+    idUser=req.params.idUser;
+    existe=false;
+    User.findOne({_id:idUser})
+        .then(user=>{
+            user.pokemons.forEach(p=>{
+                if(p.idPokemon == idPokemon && existe==false){
+                    existe=true;
+                    var indexToRemove = user.pokemons.indexOf(p);
+                    user.pokemons.splice(indexToRemove,1);
+                    user.save();
+                    res.status(201).json({message:"Pokémon retiré avec succès."})
+                }
+            });
+            if(!existe){
+                res.status(401).json({message:"Pokémon pas dans l'équipe."});
+            }
+        })
+        .catch(error => res.status(404).json({ error :"Utilisateur inexistant"}));    
+
   });
+
 
 module.exports=router;
