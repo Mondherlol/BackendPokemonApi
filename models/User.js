@@ -10,10 +10,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  pokemons: {
-    type: Array,
-    required: true
-  }
+  pokemons: [
+
+  ]
 })
 
 module.exports = mongoose.model('Users', UserSchema)

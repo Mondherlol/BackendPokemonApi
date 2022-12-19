@@ -23,7 +23,6 @@ router.post('/signup', async function(req, res, next) {
         let exists = await User.exists({nom:req.body.username});
         console.log(exists);
         if (!exists) {
-           
             const user = new User({
                 nom:req.body.username,
                 mdp:req.body.password,
@@ -51,7 +50,7 @@ router.post('/signin', async function(req, res, next) {
     
         let exists = await User.exists({nom:req.body.username});
         if (exists) {
-            const user = await User.find({nom: req.body.username})
+            const user = await User.findOne({nom: req.body.username})            
            // const hashed_password = ByEncrpyt(password.toString());
             if (user.mdp==req.body.password) {
                 let token = jwt.sign({
@@ -59,21 +58,24 @@ router.post('/signin', async function(req, res, next) {
                 }, 'secret');
                 res.send({
                     status: 1,
-                    data: req.body.username,
-                    token: token
+                    id:user._id,
+                    user: req.body.username,
+                    pokemons: user.pokemons,
+                    token: token,
+                    
                 });
             } else {
                 console.log("Wrong Password");
                 res.send({
                     status: 0,
-                    error: "error"
+                    error: "Wrong Password"
                 });
             }
         } else {
             console.log("No User Find");
             res.send({
                 status: 0,
-                error: error
+                error: "User not found"
             });
         }
     
@@ -89,9 +91,10 @@ router.get('/equipe/:id',async function(req,res){
 });
 router.put('/addPokemon/:id',async function(req,res){
     try {
+        pokemon=req.body.pokemon;
         await User.findByIdAndUpdate(req.params.id, {
-         $set:{
-             pokemons:req.body.pokemons,
+         $push:{
+             pokemons : pokemon
          }
     
         });
