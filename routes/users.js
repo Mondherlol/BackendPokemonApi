@@ -59,7 +59,7 @@ router.post('/signin', async function(req, res, next) {
                 res.send({
                     status: 1,
                     id:user._id,
-                    user: req.body.username,
+                    user: user,
                     pokemons: user.pokemons,
                     token: token,
                     
@@ -94,6 +94,13 @@ router.put('/addPokemon/:id',async function(req,res){
         const users = await User.findOne({'_id': req.params.id});
         
         if(users.pokemons.length<6){
+            if(users.pokemons.filter(p=>p.idPokemon == req.body.idPokemon).length > 0){
+                console.log("Already in the team.");
+                res.send({
+                    status: 0,
+                    error: "Already in the team!!"
+                });
+            }
             await User.findByIdAndUpdate(req.params.id, {
             
             $push:{
@@ -102,7 +109,10 @@ router.put('/addPokemon/:id',async function(req,res){
         
             });
             // Send response in here
-            res.send('pokemon ajouté!');
+            res.send({
+                status:1,
+                message:'pokemon ajouté!'}
+                );
         }
         else {
             console.log("More than 6 pokemons!!");
