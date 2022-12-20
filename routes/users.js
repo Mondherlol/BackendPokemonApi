@@ -169,14 +169,23 @@ router.put('/addPokemon/:id',async function(req,res){
                     var indexToRemove = user.pokemons.indexOf(p);
                     user.pokemons.splice(indexToRemove,1);
                     user.save();
-                    res.status(201).json({message:"Pokémon retiré avec succès."})
-                }
+                    res.send({
+                        status: 1,
+                        message: "Pokemon retiré!!"
+                    });                }
             });
             if(!existe){
-                res.status(401).json({message:"Pokémon pas dans l'équipe."});
-            }
+                res.send({
+                    status: 0,
+                    error: "Pokemon pas dans l'équipe!!"
+                });            }
         })
-        .catch(error => res.status(404).json({ error :"Utilisateur inexistant"}));    
+        .catch(error => {
+            res.send({
+                status: 0,
+                error: error
+            });
+        });    
 
   });
 
